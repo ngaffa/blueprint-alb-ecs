@@ -10,8 +10,8 @@ terraform {
 }
 # AWS provider version set up
 provider "aws" {
-  region  = "eu-west-1" 
-  profile = "ym-dev-cli"
+  region  = var.region 
+  profile = var.profile
   default_tags {
     tags = {
       Environment = "dev"
