@@ -23,118 +23,126 @@ provider "aws" {
   }
 }
 
-# Create VPC
+# Create a new VPC if `create_vpc` is true
 resource "aws_vpc" "my_vpc" {
-  cidr_block = "12.0.0.0/24"
+  count = var.create_vpc ? 1 : 0
+
+  cidr_block = var.vpc_cidr
   tags = {
     Name = "vpc-ew1-blueprint-ecs"
   }
 }
 
-# Create private subnet
-resource "aws_subnet" "private_subnet_1" {
-  vpc_id            = aws_vpc.my_vpc.id
-  cidr_block        = "12.0.0.0/26"
-  availability_zone = "eu-west-1a" 
+# Use an existing VPC if `create_vpc` is false
+data "aws_vpc" "existing" {
+  count = var.create_vpc ? 0 : 1
+  id    = var.existing_vpc_id
+}
+
+# Create private subnets if `create_vpc` is true
+resource "aws_subnet" "private_subnets" {
+  count = var.create_vpc ? length(var.private_subnet_cidr_blocks) : 0
+
+  vpc_id            = aws_vpc.my_vpc[0].id
+  cidr_block        = element(var.private_subnet_cidr_blocks, count.index)
+  availability_zone = element(var.private_subnet_azs, count.index)
   tags = {
-    Name = "private_subnet_1-ew1-blueprint-ecs-PrivateSubnet-a"
+    Name = "private_subnet_${count.index + 1}-ew1-blueprint-ecs-PrivateSubnet-${element(var.private_subnet_azs, count.index)}"
   }
 }
 
-resource "aws_subnet" "private_subnet_2" {
-  vpc_id            = aws_vpc.my_vpc.id
-  cidr_block        = "12.0.0.64/26"
-  availability_zone = "eu-west-1b" 
+# Create public subnets if `create_vpc` is true
+resource "aws_subnet" "public_subnets" {
+  count = var.create_vpc ? length(var.public_subnet_cidr_blocks) : 0
+
+  vpc_id            = aws_vpc.my_vpc[0].id
+  cidr_block        = element(var.public_subnet_cidr_blocks, count.index)
+  availability_zone = element(var.public_subnet_azs, count.index)
   tags = {
-    Name = "private_subnet_2-ew1-blueprint-ecs-PrivateSubnet-b"
+    Name = "public_subnet_${count.index + 1}-ew1-blueprint-ecs-PublicSubnet-${element(var.public_subnet_azs, count.index)}"
   }
 }
 
-# Create public subnet
-resource "aws_subnet" "public_subnet_1" {
-  vpc_id            = aws_vpc.my_vpc.id
-  cidr_block        = "12.0.0.128/27"
-  availability_zone = "eu-west-1a" 
-  tags = {
-    Name = "public_subnet_1-ew1-blueprint-ecs-PublicSubnet-a"
-  }
+# Use existing private subnets if `create_vpc` is false
+data "aws_subnet" "existing_private_subnets" {
+  count = var.create_vpc ? 0 : length(var.existing_private_subnet_ids)
+  id    = element(var.existing_private_subnet_ids, count.index)
 }
 
-resource "aws_subnet" "public_subnet_2" {
-  vpc_id            = aws_vpc.my_vpc.id
-  cidr_block        = "12.0.0.160/27"
-  availability_zone = "eu-west-1b" 
-  tags = {
-    Name = "public_subnet_2-ew1-blueprint-ecs-PublicSubnet-b"
-  }
+# Use existing public subnets if `create_vpc` is false
+data "aws_subnet" "existing_public_subnets" {
+  count = var.create_vpc ? 0 : length(var.existing_public_subnet_ids)
+  id    = element(var.existing_public_subnet_ids, count.index)
 }
 
-# Create internet gateway 
+
+
+# Create an Internet Gateway if creating a new VPC
 resource "aws_internet_gateway" "my_igw" {
-  vpc_id = aws_vpc.my_vpc.id
+  count = var.create_vpc ? 1 : 0
+
+  vpc_id = aws_vpc.my_vpc[0].id
   tags = {
     Name = "igw-ew1-blueprint-ecs"
   }
 }
 
-# Create public subnet route table
+# Create a route table for the public subnets if creating a new VPC
 resource "aws_route_table" "my_public_route_table" {
-  vpc_id = aws_vpc.my_vpc.id
+  count = var.create_vpc ? 1 : 0
+
+  vpc_id = aws_vpc.my_vpc[0].id
   route {
     cidr_block = "0.0.0.0/0"
-    gateway_id = aws_internet_gateway.my_igw.id
+    gateway_id = aws_internet_gateway.my_igw[0].id
   }
-
   tags = {
-    Name = "rtb_public-ew1-blueprint-ecs"
+    Name = "public_rt-ew1-blueprint-ecs"
   }
 }
 
-# Associate the public subnet to the route table
-resource "aws_route_table_association" "public_subnet_1_association" {
-  subnet_id      = aws_subnet.public_subnet_1.id
-  route_table_id = aws_route_table.my_public_route_table.id
-}
-
-resource "aws_route_table_association" "public_subnet_2_association" {
-  subnet_id      = aws_subnet.public_subnet_2.id
-  route_table_id = aws_route_table.my_public_route_table.id
-}
-
-# Create private subnet route table
+# Create a route table for the private subnets if creating a new VPC
 resource "aws_route_table" "my_private_route_table" {
-  vpc_id = aws_vpc.my_vpc.id
+  count = var.create_vpc ? 1 : 0
+
+  vpc_id = aws_vpc.my_vpc[0].id
   tags = {
-    Name = "rtb_private-ew1-blueprint-ecs"
+    Name = "private_rt-ew1-blueprint-ecs"
   }
 }
 
-# Associate the private subnet to the private route table
-resource "aws_route_table_association" "private_subnet_1_association" {
-  subnet_id      = aws_subnet.private_subnet_1.id
-  route_table_id = aws_route_table.my_private_route_table.id
+# Associate the public subnets with the public route table
+resource "aws_route_table_association" "public_subnets" {
+  count = var.create_vpc ? length(aws_subnet.public_subnets) : 0
+
+  subnet_id      = aws_subnet.public_subnets[count.index].id
+  route_table_id = aws_route_table.my_public_route_table[0].id
 }
 
-resource "aws_route_table_association" "private_subnet_2_association" {
-  subnet_id      = aws_subnet.private_subnet_2.id
-  route_table_id = aws_route_table.my_private_route_table.id
+# Associate the private subnets with the private route table
+resource "aws_route_table_association" "private_subnets" {
+  count = var.create_vpc ? length(aws_subnet.private_subnets) : 0
+
+  subnet_id      = aws_subnet.private_subnets[count.index].id
+  route_table_id = aws_route_table.my_private_route_table[0].id
 }
 
-# Create EC2 instence
+# Create an EC2 instance in the first public subnet
 resource "aws_instance" "example_1" {
   ami           = "ami-0bd0f7e25c32e69f6" 
   instance_type = "t2.micro"
-  subnet_id     = aws_subnet.public_subnet_1.id
+  subnet_id     = var.create_vpc ? aws_subnet.public_subnets[0].id : data.aws_subnet.existing_public_subnets[0].id
 
   tags = {
     Name = "EC2_1-ew1-blueprint-ecs-PublicSubnet-a"
   }
 }
 
+# Create an EC2 instance in the first private subnet
 resource "aws_instance" "example_2" {
   ami           = "ami-0bd0f7e25c32e69f6" 
   instance_type = "t2.micro"
-  subnet_id     = aws_subnet.private_subnet_1.id
+  subnet_id     = var.create_vpc ? aws_subnet.private_subnets[0].id : data.aws_subnet.existing_private_subnets[0].id
 
   tags = {
     Name = "EC2_2-ew1-blueprint-ecs-PrivateSubnet-a"
@@ -145,4 +153,19 @@ resource "aws_instance" "example_2" {
 resource "aws_s3_bucket" "example" {
   bucket = "S3-bucket-ew1-blueprint-ecs" 
 
+}
+
+# Output the VPC ID
+output "vpc_id" {
+  value = var.create_vpc ? aws_vpc.my_vpc[0].id : data.aws_vpc.existing[0].id
+}
+
+# Output the private subnet IDs
+output "private_subnet_ids" {
+  value = var.create_vpc ? aws_subnet.private_subnets[*].id : data.aws_subnet.existing_private_subnets[*].id
+}
+
+# Output the public subnet IDs
+output "public_subnet_ids" {
+  value = var.create_vpc ? aws_subnet.public_subnets[*].id : data.aws_subnet.existing_public_subnets[*].id
 }
