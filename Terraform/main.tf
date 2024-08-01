@@ -8,17 +8,18 @@ terraform {
     }
   }
 }
+
 # AWS provider version set up
 provider "aws" {
-  region  = var.region 
+  region  = var.region
   profile = var.profile
   default_tags {
     tags = {
-      Environment = "dev"
-      Project     = "Blueprints"
-      Developer   = "yiming"
-      Architect   = "Naoufal"
-      Company     = "GAFA CLOUD"
+      Environment = var.environment
+      Project     = var.project
+      Developer   = var.developer
+      Architect   = var.architect
+      Company     = var.company
     }
   }
 }
@@ -29,7 +30,7 @@ resource "aws_vpc" "my_vpc" {
 
   cidr_block = var.vpc_cidr
   tags = {
-    Name = "vpc-ew1-blueprint-ecs"
+    Name = var.vpc_name
   }
 }
 
@@ -47,7 +48,7 @@ resource "aws_subnet" "private_subnets" {
   cidr_block        = element(var.private_subnet_cidr_blocks, count.index)
   availability_zone = element(var.private_subnet_azs, count.index)
   tags = {
-    Name = "private_subnet_${count.index + 1}-ew1-blueprint-ecs-PrivateSubnet-${element(var.private_subnet_azs, count.index)}"
+    Name = format(var.private_subnet_name_format, count.index + 1, element(var.private_subnet_azs, count.index))
   }
 }
 
@@ -59,7 +60,7 @@ resource "aws_subnet" "public_subnets" {
   cidr_block        = element(var.public_subnet_cidr_blocks, count.index)
   availability_zone = element(var.public_subnet_azs, count.index)
   tags = {
-    Name = "public_subnet_${count.index + 1}-ew1-blueprint-ecs-PublicSubnet-${element(var.public_subnet_azs, count.index)}"
+    Name = format(var.public_subnet_name_format, count.index + 1, element(var.public_subnet_azs, count.index))
   }
 }
 
@@ -75,15 +76,13 @@ data "aws_subnet" "existing_public_subnets" {
   id    = element(var.existing_public_subnet_ids, count.index)
 }
 
-
-
 # Create an Internet Gateway if creating a new VPC
 resource "aws_internet_gateway" "my_igw" {
   count = var.create_vpc ? 1 : 0
 
   vpc_id = aws_vpc.my_vpc[0].id
   tags = {
-    Name = "igw-ew1-blueprint-ecs"
+    Name = var.igw_name
   }
 }
 
@@ -93,11 +92,11 @@ resource "aws_route_table" "my_public_route_table" {
 
   vpc_id = aws_vpc.my_vpc[0].id
   route {
-    cidr_block = "0.0.0.0/0"
+    cidr_block = var.public_route_cidr_block
     gateway_id = aws_internet_gateway.my_igw[0].id
   }
   tags = {
-    Name = "public_rt-ew1-blueprint-ecs"
+    Name = var.public_route_table_name
   }
 }
 
@@ -107,7 +106,7 @@ resource "aws_route_table" "my_private_route_table" {
 
   vpc_id = aws_vpc.my_vpc[0].id
   tags = {
-    Name = "private_rt-ew1-blueprint-ecs"
+    Name = var.private_route_table_name
   }
 }
 
@@ -129,30 +128,29 @@ resource "aws_route_table_association" "private_subnets" {
 
 # Create an EC2 instance in the first public subnet
 resource "aws_instance" "example_1" {
-  ami           = "ami-0bd0f7e25c32e69f6" 
-  instance_type = "t2.micro"
+  ami           = var.ami_id
+  instance_type = var.instance_type
   subnet_id     = var.create_vpc ? aws_subnet.public_subnets[0].id : data.aws_subnet.existing_public_subnets[0].id
 
   tags = {
-    Name = "EC2_1-ew1-blueprint-ecs-PublicSubnet-a"
+    Name = var.public_instance_name
   }
 }
 
 # Create an EC2 instance in the first private subnet
 resource "aws_instance" "example_2" {
-  ami           = "ami-0bd0f7e25c32e69f6" 
-  instance_type = "t2.micro"
+  ami           = var.ami_id
+  instance_type = var.instance_type
   subnet_id     = var.create_vpc ? aws_subnet.private_subnets[0].id : data.aws_subnet.existing_private_subnets[0].id
 
   tags = {
-    Name = "EC2_2-ew1-blueprint-ecs-PrivateSubnet-a"
+    Name = var.private_instance_name
   }
 }
 
 # Create S3 bucket
 resource "aws_s3_bucket" "example" {
-  bucket = "S3-bucket-ew1-blueprint-ecs" 
-
+  bucket = var.s3_bucket_name
 }
 
 # Output the VPC ID
