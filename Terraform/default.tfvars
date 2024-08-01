@@ -1,5 +1,4 @@
 # default.tfvars
-# test
 
 # AWS Provider settings
 region  = "eu-west-1"          
