@@ -14,7 +14,7 @@ company     = "GAFA CLOUD"
 # VPC Creation
 create_vpc      = true
 existing_vpc_id = ""
-vpc_cidr        = "12.0.0.0/24"
+vpc_cidr        = "<VPC_CIDR>"
 
 # Subnet configuration
 private_subnet_cidr_blocks = ["12.0.0.0/26", "12.0.0.64/26"]
