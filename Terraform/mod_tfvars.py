@@ -46,7 +46,7 @@ def write_tfvars(file_path, variables):
                 if isinstance(value, bool):
                     value_str = "true" if value else "false"
                 elif isinstance(value, list):
-                    value_str = f'["{", ".join(value)}"]'
+                    value_str = f'["{"\", ""\"".join(value)}"]'
                 elif isinstance(value, int) or isinstance(value, float):
                     value_str = str(value)
                 elif value == "":
