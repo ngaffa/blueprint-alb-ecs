@@ -67,13 +67,22 @@ WORK_DIR = os.getcwd()
 print("Will search and replace in default.tfvars in "+ WORK_DIR)
 
 ENTRIES = {}
+ENTRIES["CREATE_VPC"] = "DO YOU WANT TO CREATE VPCP (Yes or No): " 
 ENTRIES["VPC_CIDR"] = "Enter the VPC CIDR Please  (should respect the cidr REGEX ): " 
+
+
 
 VARS = {}
 
 # Populate VARS hashmap
 for KEY in ENTRIES:
     VARS[KEY] = EnterAndCheckEntry(KEY,ENTRIES[KEY])   
+
+
+if VARS["CREATE_VPC"] != "yes":
+    ENTRIES["existing_vpc_id"] = "Enter Existing VPC ID: " 
+    VARS["existing_vpc_id"] = EnterAndCheckEntry("existing_vpc_idexisting_vpc_id",ENTRIES["existing_vpc_id"])   
+
 
 # Print SUMUP
 print("Please verify your information before validating ")
