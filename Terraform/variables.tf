@@ -1,171 +1,155 @@
-# variables.tf
+# AWS Provider Configuration
 variable "region" {
-  description = "The AWS region to deploy to"
-  type        = string
-  default     = "eu-west-1"
+  description = "The AWS region to deploy resources."
 }
 
 variable "profile" {
-  description = "The AWS profile to use"
-  type        = string
-  default     = "ym-dev-cli"
+  description = "The AWS CLI profile to use."
 }
 
 variable "environment" {
-  description = "Environment tag"
-  type        = string
-  default     = "dev"
+  description = "The environment for the resources (e.g., dev, prod)."
 }
 
 variable "project" {
-  description = "Project tag"
-  type        = string
-  default     = "Blueprints"
+  description = "The name of the project."
 }
 
 variable "developer" {
-  description = "Developer tag"
-  type        = string
-  default     = "yiming"
+  description = "The name of the developer."
 }
 
 variable "architect" {
-  description = "Architect tag"
-  type        = string
-  default     = "Naoufal"
+  description = "The name of the architect."
 }
 
 variable "company" {
-  description = "Company tag"
-  type        = string
-  default     = "GAFA CLOUD"
+  description = "The name of the company."
 }
 
-# variables for VPC optional creation
+# VPC Configuration
 variable "create_vpc" {
-  description = "Flag to determine whether to create a new VPC"
+  description = "Whether to create a new VPC."
   type        = bool
-  default     = true
-}
-
-variable "existing_vpc_id" {
-  description = "ID of an existing VPC to use if not creating a new one"
-  type        = string
-  default     = ""
 }
 
 variable "vpc_cidr" {
-  description = "CIDR block for the new VPC"
-  type        = string
-  default     = "12.0.0.0/24"
-}
-
-variable "private_subnet_cidr_blocks" {
-  description = "CIDR blocks for private subnets if creating new VPC"
-  type        = list(string)
-  default     = ["12.0.0.0/26", "12.0.0.64/26"]
-}
-
-variable "private_subnet_azs" {
-  description = "Availability zones for private subnets"
-  type        = list(string)
-  default     = ["eu-west-1a", "eu-west-1b"]
-}
-
-variable "public_subnet_cidr_blocks" {
-  description = "CIDR blocks for public subnets if creating new VPC"
-  type        = list(string)
-  default     = ["12.0.0.128/27", "12.0.0.160/27"]
-}
-
-variable "public_subnet_azs" {
-  description = "Availability zones for public subnets"
-  type        = list(string)
-  default     = ["eu-west-1a", "eu-west-1b"]
-}
-
-# Default empty list indicating these are optional and will only be used if `create_vpc` is false
-variable "existing_private_subnet_ids" {
-  description = "IDs of existing private subnets to use if not creating new ones"
-  type        = list(string)
-  default     = []
-}
-
-# Default empty list indicating these are optional and will only be used if `create_vpc` is false
-variable "existing_public_subnet_ids" {
-  description = "IDs of existing public subnets to use if not creating new ones"
-  type        = list(string)
-  default     = []
+  description = "The CIDR block for the VPC."
 }
 
 variable "vpc_name" {
-  description = "Name tag for the VPC"
-  type        = string
-  default     = "vpc-ew1-blueprint-ecs"
+  description = "The name of the VPC."
+}
+
+variable "existing_vpc_id" {
+  description = "The ID of an existing VPC to use."
+}
+
+# Subnet Configuration
+variable "private_subnet_cidr_blocks" {
+  description = "The CIDR blocks for the private subnets."
+  type        = list(string)
+}
+
+variable "public_subnet_cidr_blocks" {
+  description = "The CIDR blocks for the public subnets."
+  type        = list(string)
+}
+
+variable "private_subnet_azs" {
+  description = "The availability zones for the private subnets."
+  type        = list(string)
+}
+
+variable "public_subnet_azs" {
+  description = "The availability zones for the public subnets."
+  type        = list(string)
 }
 
 variable "private_subnet_name_format" {
-  description = "Format for naming private subnets"
-  type        = string
-  default     = "private_subnet_%d-ew1-blueprint-ecs-PrivateSubnet-%s"
+  description = "The name format for private subnets."
 }
 
 variable "public_subnet_name_format" {
-  description = "Format for naming public subnets"
-  type        = string
-  default     = "public_subnet_%d-ew1-blueprint-ecs-PublicSubnet-%s"
+  description = "The name format for public subnets."
 }
 
+# Internet Gateway Configuration
 variable "igw_name" {
-  description = "Name tag for the Internet Gateway"
-  type        = string
-  default     = "igw-ew1-blueprint-ecs"
+  description = "The name of the Internet Gateway."
 }
 
+# Route Table Configuration
 variable "public_route_cidr_block" {
-  description = "CIDR block for the public route"
-  type        = string
-  default     = "0.0.0.0/0"
+  description = "The CIDR block for the public route."
 }
 
 variable "public_route_table_name" {
-  description = "Name tag for the public route table"
-  type        = string
-  default     = "public_rt-ew1-blueprint-ecs"
+  description = "The name of the public route table."
 }
 
 variable "private_route_table_name" {
-  description = "Name tag for the private route table"
-  type        = string
-  default     = "private_rt-ew1-blueprint-ecs"
+  description = "The name of the private route table."
 }
 
-variable "ami_id" {
-  description = "AMI ID for EC2 instances"
-  type        = string
-  default     = "ami-0bd0f7e25c32e69f6"
+# ECS Configuration
+variable "ecs_cluster_name" {
+  description = "The name of the ECS cluster."
 }
 
-variable "instance_type" {
-  description = "EC2 instance type"
-  type        = string
-  default     = "t2.micro"
+variable "service_name" {
+  description = "The name of the ECS service."
 }
 
-variable "public_instance_name" {
-  description = "Name tag for the EC2 instance in the public subnet"
-  type        = string
-  default     = "EC2_1-ew1-blueprint-ecs-PublicSubnet-a"
+# ALB Configuration
+variable "alb_name" {
+  description = "The name of the Application Load Balancer."
 }
 
-variable "private_instance_name" {
-  description = "Name tag for the EC2 instance in the private subnet"
-  type        = string
-  default     = "EC2_2-ew1-blueprint-ecs-PrivateSubnet-a"
+variable "target_group_name" {
+  description = "The name of the target group for the ALB."
 }
 
-variable "s3_bucket_name" {
-  description = "Name for the S3 bucket"
-  type        = string
-  default     = "S3-bucket-ew1-blueprint-ecs"
+# Security Group Configuration
+variable "public_sg_name" {
+  description = "The name of the public security group."
+}
+
+variable "private_sg_1_name" {
+  description = "The name of the first private security group."
+}
+
+variable "private_sg_2_name" {
+  description = "The name of the second private security group."
+}
+
+variable "public_cidr" {
+  description = "The CIDR block for public access."
+}
+
+variable "private_cidr" {
+  description = "The CIDR block for private access."
+}
+
+# ECR Configuration
+variable "ecr_repo_name" {
+  description = "The name of the ECR repository."
+}
+
+variable "ecr_policy" {
+  description = "The path to the ECR lifecycle policy JSON file."
+}
+
+# CloudWatch Configuration
+variable "log_group_name" {
+  description = "The name of the CloudWatch log group."
+}
+
+# Route 53 Configuration
+variable "route53_zone_name" {
+  description = "The name of the Route 53 hosted zone."
+}
+
+variable "route53_record_name" {
+  description = "The name of the Route 53 record for the ALB."
 }
