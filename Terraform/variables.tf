@@ -33,16 +33,26 @@ variable "create_vpc" {
   type        = bool
 }
 
+#  if "create_vpc" is false
+
+variable "existing_vpc_id" {
+  description = "The ID of an existing VPC to use."
+}
+
+variable "existing_private_subnet_ids" {
+  description = "List of existing private subnet IDs."
+}
+
+variable "existing_public_subnet_ids" {
+  description = "List of existing public subnet IDs."
+}
+#  if "create_vpc" is true
 variable "vpc_cidr" {
   description = "The CIDR block for the VPC."
 }
 
 variable "vpc_name" {
   description = "The name of the VPC."
-}
-
-variable "existing_vpc_id" {
-  description = "The ID of an existing VPC to use."
 }
 
 # Subnet Configuration
@@ -152,4 +162,39 @@ variable "route53_zone_name" {
 
 variable "route53_record_name" {
   description = "The name of the Route 53 record for the ALB."
+}
+
+# s3 bucket configuration
+variable "s3_bucket_name" {
+  description = "The name of the S3 bucket"
+}
+
+# undefined variables
+
+variable "task_family_name" {
+  description = "The family name for the ECS task definition."
+}
+
+variable "execution_role_arn" {
+  description = "The ARN of the IAM role that grants the ECS task permissions."
+}
+
+variable "cpu" {
+  description = "The number of CPU units for the ECS task."
+}
+
+variable "memory" {
+  description = "The amount of memory (in MiB) for the ECS task."
+}
+
+variable "container_name" {
+  description = "The name of the container in the ECS task definition."
+}
+
+variable "container_port" {
+  description = "The port on which the container listens."
+}
+
+variable "host_port" {
+  description = "The port on the host to which the container's port is mapped."
 }

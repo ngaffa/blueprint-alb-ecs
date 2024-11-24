@@ -6,7 +6,7 @@ resource "aws_ecs_cluster" "my_ecs_cluster" {
 # ECS Task Definition setup
 resource "aws_ecs_task_definition" "my_task_def" {
   family                   = var.task_family_name
-  execution_role_arn      = var.execution_role_arn
+  execution_role_arn       = var.execution_role_arn
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
   cpu                      = var.cpu

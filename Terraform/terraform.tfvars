@@ -1,30 +1,30 @@
 # default.tfvars
 
 # AWS Provider settings
-region  = "sfd"
-profile = "sgfsd"
+region  = "eu-west-1"
+profile = "ym-dev-cli"
 
 # Tagging
-environment = "gsdf"
-project     = "gsdfg"
-developer   = "fsadf"
-architect   = "asdf"
-company     = "asdf"
+environment = "dev"
+project     = "Blueprints"
+developer   = "yiming"
+architect   = "Naoufal"
+company     = "GAFA CLOUD"
 
-# VPC Creation
-create_vpc      = true
-existing_vpc_id = "<EXISTING_VPC_ID>"
-vpc_cidr        = "12.0.0.0/24"
-
+# VPC Configuration
+# if `create_vpc` is true
+create_vpc = true
 # Subnet configuration
+vpc_cidr                   = "12.0.0.0/24"
 private_subnet_cidr_blocks = ["12.0.0.0/26", "12.0.0.64/26"]
 private_subnet_azs         = ["eu-west-1a", "eu-west-1b"]
 public_subnet_cidr_blocks  = ["12.0.0.128/27", "12.0.0.160/27"]
 public_subnet_azs          = ["eu-west-1a", "eu-west-1b"]
 
-# Existing subnet IDs (if `create_vpc` is false)
-existing_private_subnet_ids = <EXISTING_PRIVATE_SUBNET_IDS>
-existing_public_subnet_ids  = <EXISTING_PUBLIC_SUBNET_IDS>
+# if `create_vpc` is false
+existing_vpc_id             = null #"<EXISTING_VPC_ID>"
+existing_private_subnet_ids = null #<EXISTING_PRIVATE_SUBNET_IDS>
+existing_public_subnet_ids  = null #<EXISTING_PUBLIC_SUBNET_IDS>
 
 # Resource-specific settings
 vpc_name                   = "vpc"
@@ -39,3 +39,12 @@ instance_type              = "t2.micro"
 public_instance_name       = "EC2_1-ew1-blueprint-ecs-PublicSubnet-a"
 private_instance_name      = "EC2_2-ew1-blueprint-ecs-PrivateSubnet-a"
 s3_bucket_name             = "ym-s3-bucket-ew1-blueprint-ecs"
+
+# undefined variables
+task_family_name   = "task_family_name"
+execution_role_arn = "arn:aws:iam::770800160776:role/role-user-developer"
+cpu                = 256
+memory             = 512
+container_name     = "container_name"
+container_port     = 80
+host_port          = 80
