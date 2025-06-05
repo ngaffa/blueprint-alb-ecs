@@ -167,5 +167,5 @@ variable "private_instance_name" {
 variable "s3_bucket_name" {
   description = "Name for the S3 bucket"
   type        = string
-  default     = "S3-bucket-ew1-blueprint-ecs"
+  default     = "s3-bucket-ew1-blueprint-ecs"
 }
